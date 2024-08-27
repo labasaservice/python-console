@@ -93,9 +93,11 @@ pipeline {
                         sh """
                             . ${env.VENV_NAME}/bin/activate
                             pip install twine
+                            export https_proxy=http://proxy-dmz.intel.com:912
                             twine upload --repository-url https://pkgs.dev.azure.com/${AZURE_DEVOPS_ORG}/${AZURE_DEVOPS_PROJECT}/_packaging/${AZURE_DEVOPS_FEED}/pypi/upload \
                                          -u ${AZURE_DEVOPS_USER} -p ${AZURE_DEVOPS_TOKEN} \
                                          dist/*
+                            unset https_proxy
                         """
                     }
                 }
