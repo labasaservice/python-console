@@ -9,6 +9,9 @@ pipeline {
         ARTIFACT_NAME = 'word-counter-0.1.0.tar.gz'
         PYTHON_VERSION = '3.9'
         VENV_NAME = 'venv'
+        AZURE_DEVOPS_ORG = 'LabAsAService'
+        AZURE_DEVOPS_PROJECT = 'laas-devops'
+        AZURE_DEVOPS_FEED = 'python-console'
     }
 
     stages {
@@ -77,6 +80,22 @@ pipeline {
                             -H "Content-Type: application/zip" \
                             --data-binary @dist/${ARTIFACT_NAME} \
                             "https://uploads.github.com/repos/${GITHUB_REPO}/releases/${releaseId}/assets?name=${ARTIFACT_NAME}"
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Upload to Azure DevOps Artifacts') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'AZURE_DEVOPS_TOKEN', usernameVariable: 'AZURE_DEVOPS_USER', passwordVariable: 'AZURE_DEVOPS_TOKEN')]) {
+                        sh """
+                            . ${env.VENV_NAME}/bin/activate
+                            pip install twine
+                            twine upload --repository-url https://pkgs.dev.azure.com/${AZURE_DEVOPS_ORG}/${AZURE_DEVOPS_PROJECT}/_packaging/${AZURE_DEVOPS_FEED}/pypi/upload \
+                                         -u ${AZURE_DEVOPS_USER} -p ${AZURE_DEVOPS_TOKEN} \
+                                         dist/*
                         """
                     }
                 }
