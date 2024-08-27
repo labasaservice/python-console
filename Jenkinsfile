@@ -37,7 +37,7 @@ pipeline {
 
         stage('Test') {
             steps {
-                sh ". ${env.VENV_NAME}/bin/activate && python -m pytest tests"
+                sh ". ${env.VENV_NAME}/bin/activate && python -m pytest test_word_counter.py"
             }
         }
 
