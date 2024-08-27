@@ -2,6 +2,7 @@
 import unittest
 from src import count_characters
 
+
 class TestWordCounter(unittest.TestCase):
     def test_count_characters(self):
         self.assertEqual(count_characters("hello"), 5)

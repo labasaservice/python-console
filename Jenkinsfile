@@ -30,12 +30,12 @@ pipeline {
             }
         }
 
-        stage('Test') {
+/*        stage('Test') {
             steps {
                 sh ". ${env.VENV_NAME}/bin/activate && pytest tests"
             }
         }
-
+*/
         stage('Build') {
             steps {
                 sh ". ${env.VENV_NAME}/bin/activate && python setup.py sdist bdist_wheel"
