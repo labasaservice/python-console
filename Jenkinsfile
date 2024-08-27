@@ -18,10 +18,15 @@ pipeline {
 
         stage('Setup') {
             steps {
-                sh "python${env.PYTHON_VERSION} -m venv ${env.VENV_NAME}"
-                sh ". ${env.VENV_NAME}/bin/activate"
-                sh 'pip install --upgrade pip'
-                sh 'pip install -r requirements.txt'
+                script {
+                    def pythonCmd = sh(script: 'which python3', returnStdout: true).trim()
+                    if (!pythonCmd) {
+                        error "Python 3 not found. Please install Python 3 on the Jenkins server."
+                    }
+                    sh "echo Using Python: \$(${pythonCmd} --version)"
+                    sh "${pythonCmd} -m venv ${env.VENV_NAME}"
+                    sh ". ${env.VENV_NAME}/bin/activate && pip install --upgrade pip && pip install -r requirements.txt"
+                }
             }
         }
 
