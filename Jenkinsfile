@@ -30,7 +30,8 @@ pipeline {
                     }
                     sh "echo Using Python: \$(${pythonCmd} --version)"
                     sh "${pythonCmd} -m venv ${env.VENV_NAME}"
-                    sh ". ${env.VENV_NAME}/bin/activate && pip install --upgrade pip && pip install -r requirements.txt"
+                    //sh ". ${env.VENV_NAME}/bin/activate && pip install --upgrade pip && pip install -r requirements.txt"
+                    sh ". ${env.VENV_NAME}/bin/activate && pip install -r requirements.txt --proxy=http://proxy-dmz.intel.com:912"
                 }
             }
         }

@@ -8,7 +8,7 @@ setup(
     install_requires=[],
     entry_points={
         "console_scripts": [
-            "word-counter=word_counter.counter:main",
+            "word-counter=word_counter.counter:main"
         ],
     },
 )
