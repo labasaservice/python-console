@@ -9,7 +9,7 @@ pipeline {
         VENV_NAME = 'venv'
     }
 
-    stages {
+ stages {
         stage('Checkout') {
             steps {
                 checkout scm
@@ -30,12 +30,12 @@ pipeline {
             }
         }
 
-/*        stage('Test') {
+        stage('Test') {
             steps {
-                sh ". ${env.VENV_NAME}/bin/activate && pytest tests"
+                sh ". ${env.VENV_NAME}/bin/activate && python -m pytest tests"
             }
         }
-*/
+
         stage('Build') {
             steps {
                 sh ". ${env.VENV_NAME}/bin/activate && python setup.py sdist bdist_wheel"
@@ -44,29 +44,35 @@ pipeline {
 
         stage('Upload to GitHub Artifacts') {
             steps {
-                withCredentials([string(credentialsId: 'GITHUB_TOKEN', variable: 'GITHUB_TOKEN')]) {
-                    sh '''
-                    RELEASE_ID=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-                        "https://api.github.com/repos/${GITHUB_REPO}/releases/tags/${RELEASE_TAG}" | \
-                        jq -r .id)
-                    
-                    if [ "$RELEASE_ID" = "null" ]; then
-                        echo "Release not found. Creating a new release..."
-                        RELEASE_ID=$(curl -s -X POST \
-                            -H "Authorization: token $GITHUB_TOKEN" \
-                            -H "Accept: application/vnd.github.v3+json" \
-                            -d '{"tag_name":"'${RELEASE_TAG}'","name":"Release '${RELEASE_TAG}'","body":"Automated release '${RELEASE_TAG}'","draft":false,"prerelease":false}' \
-                            "https://api.github.com/repos/${GITHUB_REPO}/releases" | \
-                            jq -r .id)
-                    fi
+                script {
+                    withCredentials([string(credentialsId: 'GITHUB_TOKEN', variable: 'GITHUB_TOKEN')]) {
+                        def releaseId = sh(script: """
+                            curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
+                            "https://api.github.com/repos/${GITHUB_REPO}/releases/tags/${RELEASE_TAG}" | \
+                            jq -r .id
+                        """, returnStdout: true).trim()
 
-                    curl -X POST \
-                    -H "Authorization: token $GITHUB_TOKEN" \
-                    -H "Accept: application/vnd.github.v3+json" \
-                    -H "Content-Type: application/zip" \
-                    --data-binary @dist/${ARTIFACT_NAME} \
-                    "https://uploads.github.com/repos/${GITHUB_REPO}/releases/${RELEASE_ID}/assets?name=${ARTIFACT_NAME}"
-                    '''
+                        if (releaseId == "null") {
+                            echo "Release not found. Creating a new release..."
+                            releaseId = sh(script: """
+                                curl -s -X POST \
+                                -H "Authorization: token ${GITHUB_TOKEN}" \
+                                -H "Accept: application/vnd.github.v3+json" \
+                                -d '{"tag_name":"${RELEASE_TAG}","name":"Release ${RELEASE_TAG}","body":"Automated release ${RELEASE_TAG}","draft":false,"prerelease":false}' \
+                                "https://api.github.com/repos/${GITHUB_REPO}/releases" | \
+                                jq -r .id
+                            """, returnStdout: true).trim()
+                        }
+
+                        sh """
+                            curl -X POST \
+                            -H "Authorization: token ${GITHUB_TOKEN}" \
+                            -H "Accept: application/vnd.github.v3+json" \
+                            -H "Content-Type: application/zip" \
+                            --data-binary @dist/${ARTIFACT_NAME} \
+                            "https://uploads.github.com/repos/${GITHUB_REPO}/releases/${releaseId}/assets?name=${ARTIFACT_NAME}"
+                        """
+                    }
                 }
             }
         }
