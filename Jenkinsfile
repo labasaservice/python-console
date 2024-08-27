@@ -86,7 +86,7 @@ pipeline {
             }
         }
 
-        stage('Upload to Azure DevOps Artifacts') {
+    /*    stage('Upload to Azure DevOps Artifacts') {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'AZURE_DEVOPS_TOKEN', usernameVariable: 'AZURE_DEVOPS_USER', passwordVariable: 'AZURE_DEVOPS_TOKEN')]) {
@@ -103,6 +103,7 @@ pipeline {
                 }
             }
         }
+        */
     }
 
     post {
