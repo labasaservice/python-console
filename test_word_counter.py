@@ -1,4 +1,4 @@
-# tests/test_word_counter.py
+
 import unittest
 from src import count_characters
 
