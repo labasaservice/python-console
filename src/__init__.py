@@ -1,0 +1,1 @@
+from .word_counter import count_characters, main

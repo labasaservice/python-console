@@ -1,6 +1,6 @@
 # tests/test_word_counter.py
 import unittest
-from src.word_counter import count_characters
+from src import count_characters
 
 class TestWordCounter(unittest.TestCase):
     def test_count_characters(self):
