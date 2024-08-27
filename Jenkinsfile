@@ -5,7 +5,7 @@ pipeline {
 
     environment {
         GITHUB_REPO = 'labasaservice/python-console'
-        RELEASE_TAG = 'v0.1.0'
+        RELEASE_TAG = 'v0.1.1'
         ARTIFACT_NAME = 'word-counter-0.1.0.tar.gz'
         PYTHON_VERSION = '3.9'
         VENV_NAME = 'venv'
