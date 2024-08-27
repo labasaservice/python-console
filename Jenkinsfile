@@ -9,7 +9,7 @@ pipeline {
         VENV_NAME = 'venv'
     }
 
- stages {
+    stages {
         stage('Checkout') {
             steps {
                 checkout scm
@@ -49,10 +49,10 @@ pipeline {
                         def releaseId = sh(script: """
                             curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
                             "https://api.github.com/repos/${GITHUB_REPO}/releases/tags/${RELEASE_TAG}" | \
-                            jq -r .id
+                            grep -oP '"id": \\K\\d+' | head -1
                         """, returnStdout: true).trim()
 
-                        if (releaseId == "null") {
+                        if (releaseId == "") {
                             echo "Release not found. Creating a new release..."
                             releaseId = sh(script: """
                                 curl -s -X POST \
@@ -60,8 +60,12 @@ pipeline {
                                 -H "Accept: application/vnd.github.v3+json" \
                                 -d '{"tag_name":"${RELEASE_TAG}","name":"Release ${RELEASE_TAG}","body":"Automated release ${RELEASE_TAG}","draft":false,"prerelease":false}' \
                                 "https://api.github.com/repos/${GITHUB_REPO}/releases" | \
-                                jq -r .id
+                                grep -oP '"id": \\K\\d+' | head -1
                             """, returnStdout: true).trim()
+                        }
+
+                        if (releaseId == "") {
+                            error "Failed to get or create release ID"
                         }
 
                         sh """
